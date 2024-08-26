@@ -89,25 +89,28 @@ go build -o iaviewer
 sudo cp iaviewer /usr/local/bin/
 cd ../../..
 
+## Using iaviewer to print iavl trees of differing modules 
 for module in $DIFFERING_MODULES; do
-color "33" "Printing the iavl tree of $module of db1"
-sleep 3
-touch hashes/node-1-$module-shape
-iaviewer shape $DB1 s/k:$module/ > hashes/node-1-$module-shape
-color "33" "Printing the iavl tree of $module of db2"
-sleep 3
-touch hashes/node-2-$module-shape
-iaviewer shape $DB2 s/k:$module/ > hashes/node-2-$module-shape
-diff hashes/node-1-$module-shape hashes/node-2-$module-shape > hashes/diff-$module-shape
+  color "33" "Printing the iavl tree of $module of db1"
+  sleep 3
+  touch hashes/node-1-$module-shape
+  iaviewer shape $DB1 s/k:$module/ > hashes/node-1-$module-shape
+  color "33" "Printing the iavl tree of $module of db2"
+  sleep 3
+  touch hashes/node-2-$module-shape
+  iaviewer shape $DB2 s/k:$module/ > hashes/node-2-$module-shape
+  diff hashes/node-1-$module-shape hashes/node-2-$module-shape > hashes/diff-$module-shape
 
-## ASCII decoding of hex string
-while IFS= read -r line; do
-  while [[ "$line" =~ ([*-][0-9]+\ )([0-9A-F]+) ]]; do
-    hex="${BASH_REMATCH[2]}"
-    ascii=$(echo "$hex" | xxd -r -p | tr -d '\000')
-    echo "$ascii" >> hashes/diff-$module-decoded
-    line="${line#*${BASH_REMATCH[2]}}"
-  done
-done < hashes/diff-$module-shape
+## ASCII decoding of hex string of diff 
+  while IFS= read -r line; do
+    while [[ "$line" =~ ([*-][0-9]+\ )([0-9A-F]+) ]]; do
+      hex="${BASH_REMATCH[2]}"
+      ascii=$(echo "$hex" | xxd -r -p | tr -d '\000')
+      echo "$ascii" >> hashes/decoded-$module
+      line="${line#*${BASH_REMATCH[2]}}"
+    done
+  done < hashes/diff-$module-shape
 
 done
+
+color "31" "All the hashes are stored in ~/apphashd/hashes folder. Root cause of apphash mismatch can be found in files named decode-* "
